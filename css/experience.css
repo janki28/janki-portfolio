@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Experience (About page): a fixed, hand-drawn flight path. A bee (light) or a
+   firefly (dark) travels it as you scroll. Roles appear one at a time: each
+   honeycomb cell fills with honey (light) or lights up like a lantern (dark)
+   when the traveler arrives. At the end the traveler flies away.
+
+   Two drawings of the same route:
+   - tablet + desktop (701px and up): a 1440 x 2640 canvas that scales with the page width
+   - phone (700px and under): a 390 x 2060 canvas, path down the left edge, cards on the right
+   ========================================================================== */
+.xp-section { padding: 90px 0 calc(55vh + 100px); } /* blank space after the bee leaves, before the polaroids */
+.xp-title { padding: 0 var(--gutter); font-size: clamp(52px, 7vw, 80px); }
+
+.xp {
+  --xp-future: #d0ccc4;
+  --xp-route: #d9a441;
+  --xp-cell: #f2c46b;
+  --xp-cell-line: #d9a441;
+  --xp-cur: #f7d488;
+  --xp-cur-line: #b9801a;
+  --xp-text: #1b1a17;
+  --xp-card: #ffffff;
+  --xp-card-line: #e4dccb;
+
+  position: relative; width: 100%; max-width: 1440px; margin: 0 auto;
+  aspect-ratio: 1440 / 2640; container-type: inline-size;
+}
+[data-theme="dark"] .xp {
+  --xp-future: #343b57;
+  --xp-route: #b8c8ff;
+  --xp-cell: #f1e37a;
+  --xp-cell-line: #fff8c8;
+  --xp-cur: #fffbd0;
+  --xp-cur-line: #ffffff;
+  --xp-text: #0b1020;
+  --xp-card: #151c3a;
+  --xp-card-line: #343b57;
+}
+
+.xp-svg { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; overflow: visible; }
+.xp-svg--m { display: none; }
+
+/* ---------- route ---------- */
+.xp-route-bg, .xp-route-fg {
+  fill: none; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 14 13;
+}
+.xp-route-bg { stroke: var(--xp-future); }
+.xp-route-fg { stroke: var(--xp-route); }
+.xp-start { fill: var(--xp-route); }
+
+/* ---------- honeycomb cells (hidden until the traveler arrives) ---------- */
+/* everything is visible by default; the hidden-until-reached states only apply once the script has started (.is-live),
+   so if the script is blocked or fails, the whole timeline still shows */
+.xp-node { transition: opacity 0.5s ease; }
+.xp-node .pop { transform-box: fill-box; transform-origin: center; transition: transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.xp.is-live .xp-node { opacity: 0; }
+.xp.is-live .xp-node .pop { transform: scale(0.7); }
+.xp-node .hx { fill: var(--xp-cell); stroke: var(--xp-cell-line); stroke-width: 2; transition: fill 0.45s ease, stroke 0.45s ease; }
+.xp-node text { font-family: var(--sans); font-weight: 500; text-anchor: middle; fill: var(--xp-text); }
+.xp-node .dec { fill: var(--xp-cell); opacity: 0.4; }
+.xp-node .dec.d2 { opacity: 0.25; }
+.xp-node .glow, .xp-node .glow2, .xp-node .halo { display: none; opacity: 0; transition: opacity 0.6s ease; }
+.xp-node .halo { fill: var(--xp-route); display: inline; }
+[data-theme="dark"] .xp-node .glow, [data-theme="dark"] .xp-node .glow2 { display: inline; }
+[data-theme="dark"] .xp-node .halo { display: none; }
+
+.xp.is-live .xp-node.is-lit { opacity: 1; }
+.xp.is-live .xp-node.is-lit .pop { transform: scale(1); }
+.xp-node.is-lit .glow, .xp:not(.is-live) .xp-node .glow { opacity: 1; }
+.xp-node.is-current .hx { fill: var(--xp-cur); stroke: var(--xp-cur-line); stroke-width: 2.5; }
+.xp-node.is-current .glow2 { opacity: 1; }
+.xp-node.is-current .halo { opacity: 0.2; }
+.xp-node:hover .hx { stroke-width: 3.5; }
+
+/* a few static sparkles for the night version */
+.xp-sparkles { display: none; }
+[data-theme="dark"] .xp-sparkles { display: inline; }
+
+/* ---------- traveler ---------- */
+.xp-bee, .xp-fly { display: none; }
+[data-theme="light"] .xp-bee, :root:not([data-theme]) .xp-bee { display: inline; }
+[data-theme="dark"] .xp-fly { display: inline; }
+.xp-traveler { pointer-events: none; }
+.xp-wing { transform-box: fill-box; transform-origin: 50% 100%; animation: xp-flap 0.2s ease-in-out infinite alternate; }
+.xp-wing.w2 { animation-delay: 0.07s; }
+@keyframes xp-flap { from { transform: scaleY(1); } to { transform: scaleY(0.72); } }
+.xp-fly .xp-lamp { animation: xp-pulse 2.6s ease-in-out infinite; }
+@keyframes xp-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+/* ---------- role cards ---------- */
+.xp-cards { list-style: none; margin: 0; padding: 0; }
+.xp-card {
+  position: absolute; top: var(--dt); width: 26.667%;
+  padding: clamp(10px, 1.4cqw, 20px) clamp(12px, 1.53cqw, 22px);
+  border: 1px solid transparent; border-radius: 16px;
+  transition: opacity 0.5s ease, transform 0.5s ease, background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.xp-card.side-l { right: var(--dr); text-align: right; }
+.xp-card.side-r { left: var(--dl); }
+.xp.is-live .xp-card { opacity: 0; transform: translateY(14px); pointer-events: none; }
+.xp.is-live .xp-card.is-reached { opacity: 1; transform: none; pointer-events: auto; }
+.xp-card .xp-meta { font-size: clamp(11px, 0.97cqw, 14px); color: var(--muted); }
+.xp-card h2 {
+  margin-top: 4px; font-family: var(--serif); font-weight: 400;
+  font-size: clamp(19px, 2.08cqw, 30px); line-height: 1.1;
+}
+.xp-card .xp-org { margin-top: 6px; font-size: clamp(12px, 1.04cqw, 15px); }
+.xp-card .xp-loc { margin-top: 2px; font-size: clamp(11px, 0.97cqw, 14px); color: var(--muted); }
+
+.xp-points { display: grid; grid-template-rows: 0fr; opacity: 0; margin-top: 0; transition: grid-template-rows 0.45s ease, opacity 0.35s ease, margin-top 0.45s ease; }
+.xp-points ul { min-height: 0; overflow: hidden; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.xp-points li { display: flex; gap: 10px; font-size: clamp(12px, 0.97cqw, 14px); line-height: 1.45; color: var(--ink-soft); }
+.xp-points li::before {
+  content: ""; flex: none; width: 8px; height: 9px; margin-top: 0.42em; background: var(--xp-cell-line);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+.xp-card.side-l .xp-points li { flex-direction: row-reverse; text-align: right; }
+
+/* fallback if the script cannot run: everything visible */
+.xp-static .xp-card { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
+.xp-static .xp-node { opacity: 1 !important; }
+.xp-static .xp-node .pop { transform: scale(1) !important; }
+
+.xp-card.is-current {
+  background: var(--xp-card); border-color: var(--xp-card-line);
+  box-shadow: 0 18px 40px rgba(27, 26, 23, 0.12);
+}
+[data-theme="dark"] .xp-card.is-current { box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(230, 255, 110, 0.08); }
+.xp-card.is-current .xp-meta { color: var(--accent-strong); }
+.xp-card.is-current .xp-points { grid-template-rows: 1fr; opacity: 1; margin-top: 14px; }
+
+/* ---------- tablet: the same drawing, scaled down, with bolder lines and labels so it stays readable ---------- */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .xp-svg--d .xp-route-bg, .xp-svg--d .xp-route-fg { stroke-width: 7; stroke-dasharray: 20 18; }
+  .xp-svg--d .xp-node text { font-size: 21px; }
+  .xp-svg--d .xp-node .hx { stroke-width: 3; }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 700px) {
+  .xp-section { padding-top: 56px; }
+  .xp-title { font-size: 44px; }
+  .xp { aspect-ratio: 390 / 2060; max-width: 520px; overflow-x: clip; }
+  .xp-svg--d { display: none; }
+  .xp-svg--m { display: block; }
+  .xp-svg--m .xp-route-bg, .xp-svg--m .xp-route-fg { stroke-width: 4; stroke-dasharray: 12 11; }
+
+  .xp-card, .xp-card.side-l, .xp-card.side-r {
+    top: var(--pt); left: 34.6%; right: auto; width: 63%; text-align: left;
+    padding: 12px 14px; border-radius: 14px;
+  }
+  .xp-card .xp-meta { font-size: clamp(11px, 3.1cqw, 13px); }
+  .xp-card h2 { font-size: clamp(21px, 6.4cqw, 28px); }
+  .xp-card .xp-org { font-size: clamp(13px, 3.6cqw, 15px); }
+  .xp-card .xp-loc { font-size: clamp(12px, 3.3cqw, 14px); }
+  .xp-points li, .xp-card.side-l .xp-points li { font-size: clamp(12px, 3.3cqw, 14px); flex-direction: row; text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-wing, .xp-fly .xp-lamp { animation: none; }
+}

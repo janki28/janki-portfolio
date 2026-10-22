@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Responsive layer: tablet (701-900px) and phone (up to 700px).
+   Loaded AFTER base.css and pages.css; nothing above 900px is changed, so the
+   desktop layout stays exactly as designed. Layouts follow the tablet and phone
+   boards from the design canvas.
+   ========================================================================== */
+
+/* Home link that js/responsive.js adds to the nav: phone only */
+.nav-home { display: none; }
+
+/* ==========================================================================
+   TABLET: 701px to 1000px  (home projects stay in one row of three)
+   ========================================================================== */
+@media (min-width: 701px) and (max-width: 1000px) {
+  .work-grid.home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .home-grid .card-media { aspect-ratio: 1 / 1; border-radius: 16px; }
+  .home-grid .card-title { font-size: 28px; margin-top: 14px; }
+  .home-grid .card-desc { font-size: 14px; line-height: 1.45; min-height: 0; }
+}
+
+/* ==========================================================================
+   TABLET: 701px to 900px  (hero stays two columns, postcard stays horizontal)
+   ========================================================================== */
+@media (min-width: 701px) and (max-width: 900px) {
+  /* hero */
+  .home { grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "name photo" "tag photo" "act photo"; padding: 110px 40px 70px; column-gap: 36px; }
+  .home h1 { font-size: clamp(84px, 14.4vw, 118px); line-height: 0.92; }
+  .home .hero-photo { justify-self: end; margin-top: 0; max-width: 300px; }
+  .home .tagline { margin-top: 28px; max-width: 340px; font-size: 21px; }
+  .home .actions { margin-top: 30px; }
+
+  /* postcard: photo column narrows to 240px, text stays on the right */
+  .flip { transform: rotate(-0.4deg); }
+  .postcard { grid-template-columns: 240px minmax(0, 1fr); }
+  .postcard-photo { min-height: 0; aspect-ratio: auto; margin: 18px 0 18px 18px; }
+  .postcard-body { border-left: 1px solid var(--card-line); padding: 30px 30px 24px 28px; }
+  .postcard h1, .postcard h2 { font-size: 42px; padding-right: 80px; }
+  .postcard .body { margin-top: 18px; font-size: 15px; line-height: 1.6; }
+  .postcard-foot { padding-top: 24px; }
+  .stamp { top: 20px; right: 24px; width: 64px; height: 80px; padding: 5px; }
+  .postmark { top: 18px; right: 78px; width: 70px; height: 70px; }
+  .front-caption { left: 34px; bottom: 34px; }
+  .front-credit { left: 34px; }
+}
+
+/* ==========================================================================
+   PHONE: up to 700px
+   ========================================================================== */
+@media (max-width: 700px) {
+  body { padding-bottom: 104px; }
+
+  /* ---- navigation: floating pill at the bottom, within thumb reach ---- */
+  /* the header keeps Janki Patel + the theme button at the top; a blur on it would trap the fixed nav pill inside the header */
+  .site-header.is-stuck, .home-page .site-header.is-stuck, body:not(.home-page) .site-header.is-stuck {
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    background: color-mix(in srgb, var(--bg) 95%, transparent);
+  }
+  .nav-links {
+    left: 16px; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom)); height: 56px;
+    padding: 0 8px; border-radius: 999px; background: #ffffff; border: 1px solid var(--line);
+    box-shadow: 0 10px 28px rgba(27, 26, 23, 0.14); align-items: center;
+  }
+  [data-theme="dark"] .nav-links { background: #151c3a; border-color: #343b57; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+  .nav-links a {
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    min-width: 64px; min-height: 44px; padding: 0 6px; font-size: 14px; color: var(--muted);
+  }
+  .nav-links a[aria-current] { color: var(--ink); font-weight: 500; text-decoration: none; }
+  .nav-links a[aria-current]::after {
+    content: ""; position: absolute; left: 50%; bottom: 3px; width: 5px; height: 5px; margin-left: -2.5px;
+    border-radius: 50%; background: var(--accent, #d9a441);
+  }
+
+  /* ---- home hero: rounded photo with the name on its bottom-right corner ---- */
+  .home { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "tag" "act"; align-content: start; padding: 72px 16px 40px; min-height: 100svh; }
+  .home .hero-photo {
+    grid-area: photo; justify-self: stretch; width: 100%; max-width: none; margin: 0;
+    aspect-ratio: 7 / 10; border-radius: 22px;
+  }
+  .home .hero-photo::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(27, 26, 23, 0), rgba(27, 26, 23, 0.62)); pointer-events: none;
+  }
+  .home h1 {
+    grid-area: photo; z-index: 2; align-self: end; justify-self: end; text-align: right;
+    padding: 0 20px 16px 0; font-size: clamp(60px, 21.5vw, 84px); line-height: 0.92; letter-spacing: -0.02em; color: #ffffff;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.25); pointer-events: none;
+  }
+  .home .tagline { margin-top: 20px; font-size: 20px; line-height: 1.4; }
+  .home .actions { display: flex; flex-wrap: nowrap; gap: 10px; margin-top: 16px; }
+  .home .actions .btn { flex: 1; justify-content: center; min-height: 48px; padding: 0 12px; font-size: 15px; }
+
+  /* ---- home projects: one column of cards ---- */
+  .home-sec { padding-left: 16px; padding-right: 16px; }
+  .home-sec .page-title { font-size: 40px; }
+  .work-grid.home-grid { grid-template-columns: 1fr; gap: 28px; }
+  .home-grid .card-media { aspect-ratio: 16 / 9; border-radius: 16px; }
+  .home-grid .card-title { font-size: 28px; margin-top: 12px; }
+  .home-grid .card-desc { font-size: 14px; line-height: 1.45; }
+  .sec-foot { margin-top: 28px; }
+
+  /* ---- about: postcard turns portrait ---- */
+  .about { padding: 84px 16px 36px; }
+  .flip { transform: rotate(-0.4deg); }
+  .front-caption { left: 30px; bottom: 56px; font-size: 30px; }
+  .front-credit { left: 30px; bottom: 32px; }
+  .flip-hint { right: 28px; bottom: 28px; }
+  .postcard-photo { min-height: 0; height: 210px; aspect-ratio: auto; margin: 14px 14px 0; }
+  .postcard-body { padding: 24px 20px 22px; }
+  .postcard h1, .postcard h2 { font-size: 40px; padding-right: 0; }
+  .postcard .body { margin-top: 14px; font-size: 15px; line-height: 1.6; }
+  .postcard .body + .body { margin-top: 10px; }
+  .postcard-foot { padding-top: 22px; }
+  .stamp { top: -46px; right: 26px; width: 58px; height: 72px; padding: 5px; transform: rotate(3deg); }
+  .postmark { display: none; }
+  .postcard .icon-slot { --s: 40px; }
+  .resume-link { display: inline-flex; align-items: center; min-height: 44px; }
+
+  /* ---- contact band ---- */
+  .contact-band { padding-left: 16px; padding-right: 16px; }
+  .contact-title { font-size: clamp(56px, 17vw, 84px); }
+}
