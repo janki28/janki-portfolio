@@ -23,7 +23,7 @@
   --xp-card-line: #e4dccb;
 
   position: relative; width: 100%; max-width: 1440px; margin: 0 auto;
-  aspect-ratio: 1440 / 2640; container-type: inline-size;
+  aspect-ratio: 1440 / 2640; --u: min(1vw, 14.4px);
 }
 [data-theme="dark"] .xp {
   --xp-future: #343b57;
@@ -91,7 +91,7 @@
 .xp-cards { list-style: none; margin: 0; padding: 0; }
 .xp-card {
   position: absolute; top: var(--dt); width: 26.667%;
-  padding: clamp(10px, 1.4cqw, 20px) clamp(12px, 1.53cqw, 22px);
+  padding: clamp(10px, calc(1.4 * var(--u)), 20px) clamp(12px, calc(1.53 * var(--u)), 22px);
   border: 1px solid transparent; border-radius: 16px;
   transition: opacity 0.5s ease, transform 0.5s ease, background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
@@ -99,17 +99,17 @@
 .xp-card.side-r { left: var(--dl); }
 .xp.is-live .xp-card { opacity: 0; transform: translateY(14px); pointer-events: none; }
 .xp.is-live .xp-card.is-reached { opacity: 1; transform: none; pointer-events: auto; }
-.xp-card .xp-meta { font-size: clamp(11px, 0.97cqw, 14px); color: var(--muted); }
+.xp-card .xp-meta { font-size: clamp(11px, calc(0.97 * var(--u)), 14px); color: var(--muted); }
 .xp-card h2 {
   margin-top: 4px; font-family: var(--serif); font-weight: 400;
-  font-size: clamp(19px, 2.08cqw, 30px); line-height: 1.1;
+  font-size: clamp(19px, calc(2.08 * var(--u)), 30px); line-height: 1.1;
 }
-.xp-card .xp-org { margin-top: 6px; font-size: clamp(12px, 1.04cqw, 15px); }
-.xp-card .xp-loc { margin-top: 2px; font-size: clamp(11px, 0.97cqw, 14px); color: var(--muted); }
+.xp-card .xp-org { margin-top: 6px; font-size: clamp(12px, calc(1.04 * var(--u)), 15px); }
+.xp-card .xp-loc { margin-top: 2px; font-size: clamp(11px, calc(0.97 * var(--u)), 14px); color: var(--muted); }
 
 .xp-points { display: grid; grid-template-rows: 0fr; opacity: 0; margin-top: 0; transition: grid-template-rows 0.45s ease, opacity 0.35s ease, margin-top 0.45s ease; }
 .xp-points ul { min-height: 0; overflow: hidden; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.xp-points li { display: flex; gap: 10px; font-size: clamp(12px, 0.97cqw, 14px); line-height: 1.45; color: var(--ink-soft); }
+.xp-points li { display: flex; gap: 10px; font-size: clamp(12px, calc(0.97 * var(--u)), 14px); line-height: 1.45; color: var(--ink-soft); }
 .xp-points li::before {
   content: ""; flex: none; width: 8px; height: 9px; margin-top: 0.42em; background: var(--xp-cell-line);
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
@@ -140,7 +140,7 @@
 @media (max-width: 700px) {
   .xp-section { padding-top: 56px; }
   .xp-title { font-size: 44px; }
-  .xp { aspect-ratio: 390 / 2060; max-width: 520px; overflow-x: clip; }
+  .xp { aspect-ratio: 390 / 2060; max-width: 520px; --u: min(1vw, 5.2px); overflow-x: hidden; }
   .xp-svg--d { display: none; }
   .xp-svg--m { display: block; }
   .xp-svg--m .xp-route-bg, .xp-svg--m .xp-route-fg { stroke-width: 4; stroke-dasharray: 12 11; }
@@ -149,13 +149,19 @@
     top: var(--pt); left: 34.6%; right: auto; width: 63%; text-align: left;
     padding: 12px 14px; border-radius: 14px;
   }
-  .xp-card .xp-meta { font-size: clamp(11px, 3.1cqw, 13px); }
-  .xp-card h2 { font-size: clamp(21px, 6.4cqw, 28px); }
-  .xp-card .xp-org { font-size: clamp(13px, 3.6cqw, 15px); }
-  .xp-card .xp-loc { font-size: clamp(12px, 3.3cqw, 14px); }
-  .xp-points li, .xp-card.side-l .xp-points li { font-size: clamp(12px, 3.3cqw, 14px); flex-direction: row; text-align: left; }
+  .xp-card .xp-meta { font-size: clamp(11px, calc(3.1 * var(--u)), 13px); }
+  .xp-card h2 { font-size: clamp(21px, calc(6.4 * var(--u)), 28px); }
+  .xp-card .xp-org { font-size: clamp(13px, calc(3.6 * var(--u)), 15px); }
+  .xp-card .xp-loc { font-size: clamp(12px, calc(3.3 * var(--u)), 14px); }
+  .xp-points li, .xp-card.side-l .xp-points li { font-size: clamp(12px, calc(3.3 * var(--u)), 14px); flex-direction: row; text-align: left; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .xp-wing, .xp-fly .xp-lamp { animation: none; }
+}
+
+/* older browsers without aspect-ratio: reserve the height with a spacer instead */
+@supports not (aspect-ratio: 1 / 1) {
+  .xp::before { content: ""; display: block; padding-top: 183.333%; }
+  @media (max-width: 700px) { .xp::before { padding-top: 528.205%; } }
 }
