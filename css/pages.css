@@ -41,19 +41,19 @@
 /* ==========================================================================
    HOME SCROLL STORY: hero > work (3) > about > contact
    ========================================================================== */
-html.home-root { scroll-snap-type: y proximity; }
-.home { position: relative; scroll-snap-align: start; }
-.home-sec { scroll-snap-align: start; min-height: 100svh; padding: 110px var(--gutter) 70px; display: flex; flex-direction: column; justify-content: center; }
+
+.home { position: relative; }
+.home-sec { min-height: 100svh; padding: 110px var(--gutter) 70px; display: flex; flex-direction: column; justify-content: center; }
 .home-page .site-header { position: fixed; transition: background-color 0.3s ease, padding 0.3s ease, border-color 0.3s ease; border-bottom: 1px solid transparent; padding-bottom: 0; }
 .home-page .site-header.is-stuck {
   padding-top: 14px; padding-bottom: 14px; border-bottom-color: var(--line-soft);
-  background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--bg) 96%, transparent); 
 }
 /* every other page gets the same sticky header (js/responsive.js toggles .is-stuck) */
 body:not(.home-page) .site-header { position: fixed; transition: background-color 0.3s ease, padding 0.3s ease, border-color 0.3s ease; border-bottom: 1px solid transparent; padding-bottom: 0; }
 body:not(.home-page) .site-header.is-stuck {
   padding-top: 14px; padding-bottom: 14px; border-bottom-color: var(--line-soft);
-  background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--bg) 96%, transparent); 
 }
 .home-page .wordmark-hide { display: block; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 .home-page .site-header.is-stuck .wordmark-hide { opacity: 1; pointer-events: auto; }

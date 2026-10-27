@@ -114,6 +114,12 @@
     return {
       go() {
         tgt = target();
+        const r = svg.getBoundingClientRect();
+        if (r.bottom < -400 || r.top > window.innerHeight + 400) {   // off screen: no animation work at all
+          if (raf) { cancelAnimationFrame(raf); raf = 0; }
+          if (Math.abs(tgt - disp) > 0.5) { disp = tgt; place(); }
+          return;
+        }
         if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
       },
       activate() {                                  // jump straight to where the page is now
