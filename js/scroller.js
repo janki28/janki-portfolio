@@ -1,6 +1,8 @@
 /* Scroll indicator on the right edge: a red rose (light) or an owl (dark)
    slides down a thin track as you scroll, and sways a little with scroll speed.
-   Native scrolling is untouched. */
+   It works like a scrollbar: drag the rose/owl, or click the track to jump there.
+   Also: a "back to top" button (bottom right) and window.smoothScrollTo(), an eased
+   page scroll shared with js/pager.js. */
 (() => {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -22,28 +24,57 @@
       <path d="M-4 15 L-4 19 M4 15 L4 19" stroke="#E3B25B" stroke-width="1.6" stroke-linecap="round"/>
     </svg>`;
 
+  /* ---------- eased page scrolling (one animation at a time) ---------- */
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const maxScroll = () => Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+  const jump = (y) => window.scrollTo({ top: y, left: 0, behavior: "instant" });
+  let anim = 0;
+  const root = document.documentElement;
+  function stop() { if (anim) { cancelAnimationFrame(anim); anim = 0; } root.classList.remove("is-gliding"); }
+  function smoothScrollTo(y, ms, done) {
+    stop();
+    const from = window.scrollY, to = Math.min(Math.max(y, 0), maxScroll()), d = to - from;
+    if (Math.abs(d) < 1 || reduce.matches) { jump(to); root.classList.remove("is-gliding"); if (done) done(); return; }
+    const dur = ms || Math.min(1300, Math.max(650, 420 + Math.abs(d) * 0.35));
+    const t0 = performance.now();
+    root.classList.add("is-gliding");             // touch snapping waits until the glide is over
+    const step = (now) => {
+      const t = Math.min(1, (now - t0) / dur);
+      jump(from + d * ease(t));
+      if (t < 1) anim = requestAnimationFrame(step);
+      else { anim = 0; root.classList.remove("is-gliding"); if (done) done(); }
+    };
+    anim = requestAnimationFrame(step);
+  }
+  window.smoothScrollTo = smoothScrollTo;
+  window.stopSmoothScroll = stop;
+  window.isSmoothScrolling = () => anim !== 0;
+  // a person grabbing the page (touch, scrollbar, middle click) always wins over an animation
+  ["touchstart", "mousedown"].forEach((ev) => window.addEventListener(ev, (e) => { if (!e.target.closest || !e.target.closest(".to-top, .scroll-track")) stop(); }, { passive: true }));
+
+  /* ---------- the rose / owl track ---------- */
   const track = document.createElement("div");
-  track.className = "scroll-track";
+  track.className = "scroll-track is-clickable";
   track.setAttribute("aria-hidden", "true");
   track.innerHTML = `<div class="scroll-thumb"><div class="tilt">${rose}${owl}</div></div>`;
   document.body.appendChild(track);
   const thumb = track.querySelector(".scroll-thumb");
   const tilt = track.querySelector(".tilt");
+  const THUMB = 44;
 
   let lastY = window.scrollY, rot = 0, ticking = false;
 
   function update() {
-    const doc = document.documentElement;
-    const max = Math.max(doc.scrollHeight - window.innerHeight, 0);
+    const max = maxScroll();
     const p = max ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
-    const room = Math.max(track.clientHeight - 44, 0);
+    const room = Math.max(track.clientHeight - THUMB, 0);
     thumb.style.transform = `translate3d(-50%, ${(p * room).toFixed(1)}px, 0)`;
 
-    if (!reduce.matches) {
+    if (!reduce.matches && !dragging) {
       const v = window.scrollY - lastY;
-      lastY = window.scrollY;
       rot += (Math.max(-14, Math.min(14, v * 0.5)) - rot) * 0.25;
-    } else rot = 0;
+    } else rot *= 0.5;
+    lastY = window.scrollY;
     tilt.style.transform = `rotate(${rot.toFixed(2)}deg)`;
 
     if (Math.abs(rot) > 0.15) requestAnimationFrame(update);
@@ -51,8 +82,57 @@
   }
   function schedule() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
 
-  window.addEventListener("scroll", schedule, { passive: true });
+  /* dragging: the rose/owl follows the pointer and the page follows it, like a native scrollbar thumb */
+  let dragging = false, grab = 0;
+  const pFromPointer = (clientY) => {
+    const r = track.getBoundingClientRect();
+    const room = Math.max(r.height - THUMB, 1);
+    return Math.min(Math.max((clientY - r.top - grab) / room, 0), 1);
+  };
+  track.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    stop();
+    const tr = thumb.getBoundingClientRect();
+    if (e.target.closest(".scroll-thumb")) {
+      dragging = true; grab = e.clientY - tr.top;
+      track.setPointerCapture(e.pointerId);
+      document.documentElement.classList.add("is-dragging-scroll");
+    } else {
+      grab = THUMB / 2;                          // click on the track: glide there
+      smoothScrollTo(pFromPointer(e.clientY) * maxScroll());
+    }
+  });
+  track.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    jump(pFromPointer(e.clientY) * maxScroll());
+  });
+  const endDrag = () => {
+    if (!dragging) return;
+    dragging = false;
+    document.documentElement.classList.remove("is-dragging-scroll");
+    window.dispatchEvent(new CustomEvent("scrollbar-release"));
+  };
+  track.addEventListener("pointerup", endDrag);
+  track.addEventListener("pointercancel", endDrag);
+  track.addEventListener("lostpointercapture", endDrag);
+
+  /* ---------- back to top ---------- */
+  const top = document.createElement("button");
+  top.type = "button";
+  top.className = "to-top";
+  top.setAttribute("aria-label", "Back to top");
+  top.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M4.5 9.5 10 4l5.5 5.5"/></svg>`;
+  document.body.appendChild(top);
+  top.addEventListener("click", () => smoothScrollTo(0, Math.min(1600, Math.max(700, 500 + window.scrollY * 0.12))));
+  let shown = false;
+  function toggleTop() {
+    const show = window.scrollY > window.innerHeight * 0.8;
+    if (show !== shown) { shown = show; top.classList.toggle("is-shown", show); }
+  }
+
+  window.addEventListener("scroll", () => { schedule(); toggleTop(); }, { passive: true });
   window.addEventListener("resize", schedule);
   window.addEventListener("load", schedule);
-  schedule();
+  schedule(); toggleTop();
 })();

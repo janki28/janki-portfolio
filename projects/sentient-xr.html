@@ -7,7 +7,7 @@
 <meta name="description" content="Zero-install WebXR system that brings live city-scale sensor data into augmented reality.">
 <meta name="theme-color" content="#FAF7F2">
 <meta name="color-scheme" content="light dark">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-L0vLn8XIhZDRpUTTY1UAx1QXcjI+GWsI21G0WB/5Mg4='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://commons.wikimedia.org https://upload.wikimedia.org; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-L0vLn8XIhZDRpUTTY1UAx1QXcjI+GWsI21G0WB/5Mg4='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="index, follow, noai, noimageai">
 <meta property="og:type" content="website">
@@ -40,10 +40,10 @@
   <p class="cs-summary">Zero-install WebXR system that brings live city-scale sensor data into augmented reality.</p>
 
   <dl class="cs-meta">
-    <div><dt>Role</dt><dd>Developer</dd></div>
-    <div><dt>Team</dt><dd>Team project</dd></div>
-    <div><dt>Tools</dt><dd>Unity · Needle Engine · WebXR</dd></div>
-    <div><dt>Status</dt><dd>Paper accepted, TVCG-ISMAR 2026</dd></div>
+    <div><dt>Role</dt><dd>Software Developer</dd></div>
+    <div><dt>Team</dt><dd>Academic · 6 months · 5 co-authors</dd></div>
+    <div><dt>Tools</dt><dd>Unity · Needle Engine · Three.js · WebXR · AWS</dd></div>
+    <div><dt>Status</dt><dd>Accepted, TVCG-ISMAR 2026</dd></div>
   </dl>
 
   <div class="cs-hero ph" data-label="Hero image or demo video"><img src="../assets/images/projects/sentient-xr/hero.jpg" alt="Sentient XR" loading="lazy" decoding="async"></div>
@@ -51,35 +51,64 @@
   <section class="cs-section" aria-labelledby="overview">
     <h2 id="overview">Overview</h2>
     <div class="cs-body">
-      <p class="cs-lead">What it is, who it is for, and the problem it solves, in two or three sentences.</p>
-      <p class="cs-text">One short paragraph of context: where the project came from and what the team set out to do.</p>
+      <p class="cs-lead">A zero-install, city-scale WebXR augmented reality system that shows live environmental sensor data as particle fields anchored to real places, so people can see and stand inside the atmosphere without downloading an app.</p>
+      <p class="cs-text">The vision: make environmental data understandable and physically experienced at city scale. Instead of checking a weather app, you walk through the current state of the air, rendered at real GPS coordinates in your browser.</p>
+      <div class="cs-figure ph" data-label="Overview image"><img src="../assets/images/projects/sentient-xr/overview.jpg" alt="" loading="lazy" decoding="async"></div>
     </div>
+  </section>
+
+  <section class="cs-section" aria-labelledby="design">
+    <h2 id="design">Experience design</h2>
+    <ul class="cs-list">
+      <li>People scan a QR code in public space and open a browser-based AR view, with an average of 7.6 seconds from scan to interaction and no install.</li>
+      <li>On Android, the live street view is overlaid with a particle field at the user's location.</li>
+      <li>Color shows temperature, from cool teal to hot red-orange. Motion speed shows wind, and turbulence shows gust intensity.</li>
+    </ul>
   </section>
 
   <section class="cs-section" aria-labelledby="role">
     <h2 id="role">My role</h2>
     <ul class="cs-list">
-      <li>What I owned, in one line.</li>
-      <li>What I built or designed, in one line.</li>
-      <li>What I handed off or worked on with others.</li>
-      <li>What I shipped or presented.</li>
+      <li>Developed and shipped the XR, AR and WebXR builds in C#, TypeScript, Unity and Three.js, from immersive data visualization to digital twins.</li>
+      <li>Built the real-time pipeline that connects AWS APIs and environmental sensor networks to the AR camera view across web, iPad and Android.</li>
+      <li>Optimized rendering and data handling through profiling, shader work and image-processing improvements, holding 45&ndash;60 FPS.</li>
+      <li>Worked with researchers, designers and domain experts to turn ambiguous requirements into working prototypes, and resolved 50+ technical issues.</li>
     </ul>
   </section>
+
+  <div class="cs-strip" role="group" aria-label="Project images">
+    <div class="cs-strip-img ph" data-label="Image 1"><img src="../assets/images/projects/sentient-xr/strip-1.jpg" alt="" loading="lazy" decoding="async"></div>
+    <div class="cs-strip-img ph" data-label="Image 2"><img src="../assets/images/projects/sentient-xr/strip-2.jpg" alt="" loading="lazy" decoding="async"></div>
+    <div class="cs-strip-img ph" data-label="Image 3"><img src="../assets/images/projects/sentient-xr/strip-3.jpg" alt="" loading="lazy" decoding="async"></div>
+  </div>
 
   <section class="cs-section" aria-labelledby="tech">
     <h2 id="tech">Technical development</h2>
     <div class="cs-tech">
-      <div class="cs-tech-item"><span class="num">01</span><div><h3>Name the technical decision</h3><p>Two lines on what you built and why it was built that way.</p></div></div>
-      <div class="cs-tech-item"><span class="num">02</span><div><h3>Name the next one</h3><p>Two lines on what you built and why it was built that way.</p></div></div>
-      <div class="cs-tech-item"><span class="num">03</span><div><h3>Name the third</h3><p>Two lines on what you built and why it was built that way.</p></div></div>
+      <div class="cs-tech-item"><span class="num">01</span><div><h3>Browser-delivered AR client</h3><p>Built in Unity and exported through Needle Engine to a Three.js and WebGL runtime. With no native app wrapper, the design could not assume native-mobile performance.</p></div></div>
+      <div class="cs-tech-item"><span class="num">02</span><div><h3>Two modes, one codebase</h3><p>A 3D exploration mode shows weather stations as particle fields over a simplified city. A camera-overlay AR mode on Android anchors one field to the user's GPS position. Both share the update loop and particle transfer functions.</p></div></div>
+      <div class="cs-tech-item"><span class="num">03</span><div><h3>City geometry for mobile WebGL</h3><p>Low-polygon building masses, about 2,400 polygons for a focused variant and about 118,000 for the full city. A separate wireframe layer keeps edges clear, because outline shaders were not reliable in Needle's mobile WebGL export.</p></div></div>
     </div>
   </section>
+
+  <section class="cs-section cs-stack-sec" aria-labelledby="stack">
+    <h2 id="stack">Tools and tech stack</h2>
+    <ul class="cs-stack">
+      <li><span class="cs-logo ph" data-label="Logo"><img src="../assets/icons/stack/unity.svg" alt="" loading="lazy" decoding="async"></span><span>Unity</span></li>
+      <li><span class="cs-logo ph" data-label="Logo"><img src="../assets/icons/stack/needle-engine.svg" alt="" loading="lazy" decoding="async"></span><span>Needle Engine</span></li>
+      <li><span class="cs-logo ph" data-label="Logo"><img src="../assets/icons/stack/three-js-webgl.svg" alt="" loading="lazy" decoding="async"></span><span>Three.js / WebGL</span></li>
+      <li><span class="cs-logo ph" data-label="Logo"><img src="../assets/icons/stack/webxr-device-api.svg" alt="" loading="lazy" decoding="async"></span><span>WebXR Device API</span></li>
+      <li><span class="cs-logo ph" data-label="Logo"><img src="../assets/icons/stack/aws-lambda.svg" alt="" loading="lazy" decoding="async"></span><span>AWS Lambda</span></li>
+      <li><span class="cs-logo ph" data-label="Logo"><img src="../assets/icons/stack/amazon-s3.svg" alt="" loading="lazy" decoding="async"></span><span>Amazon S3</span></li>
+      <li><span class="cs-logo ph" data-label="Logo"><img src="../assets/icons/stack/ambient-weather-network.svg" alt="" loading="lazy" decoding="async"></span><span>Ambient Weather Network</span></li>
+    </ul>
+</section>
 
   <section class="cs-section" aria-labelledby="challenges">
     <h2 id="challenges">Challenges</h2>
     <div class="cs-cards">
-      <div class="cs-card"><small>Challenge</small><h3>What got in the way</h3><small>What I did</small><p>How it was solved.</p></div>
-      <div class="cs-card"><small>Challenge</small><h3>What got in the way</h3><small>What I did</small><p>How it was solved.</p></div>
+      <div class="cs-card"><h3>Cross-platform AR</h3><small>What we did</small><p>iOS Safari does not yet support WebXR AR sessions, which excludes roughly half of US smartphone users. We built a 3D fallback and named cross-platform parity as a priority for future work.</p></div>
+      <div class="cs-card"><h3>Rendering vs. accessibility</h3><small>What we did</small><p>On entry-level Android hardware, frame rate dropped to 21 FPS under heavy particle load. We treated the particle budget as an accessibility decision and chose graceful degradation over excluding lower-end devices.</p></div>
     </div>
   </section>
 
@@ -87,11 +116,12 @@
     <h2 id="outcome">Outcome</h2>
     <div>
       <div class="cs-stats">
-        <div><strong>[ result ]</strong><span>What it measures</span></div>
-        <div><strong>[ result ]</strong><span>What it measures</span></div>
-        <div><strong>[ result ]</strong><span>What it measures</span></div>
+        <div><strong>7.6 s</strong><span>Average time from scan to interaction, no install</span></div>
+        <div><strong>21 FPS</strong><span>Floor on entry-level Android under heavy load</span></div>
+        <div><strong>ISMAR 2026</strong><span>Accepted to TVCG-ISMAR 2026, presented October 9 in Italy</span></div>
       </div>
-      <p class="cs-links">Links: <a href="#">Paper</a> · <a href="#">Live demo</a> · <a href="#">Code</a></p>
+      <p class="cs-text" style="margin-top:28px;max-width:760px">Also submitted as a full research paper to IEEE ICIR 2026, co-authored with four collaborators at Arizona State University. We measured spatial translation effort, the mental work of relating a display to the physical surroundings, and found it drove the comprehension advantage, not just novelty preference.</p>
+      <p class="cs-links">Links: <a href="https://ieeexplore.ieee.org/document/11628371" rel="noopener noreferrer">Paper (IEEE ICIR 2026)</a> · <a href="#" data-todo="ismar-paper-link">Paper (IEEE ISMAR 2026)</a> · <a href="https://sentienttwin-c4kmq1dlzkp-z1xvsl4.needle.run/?room=696878" rel="noopener noreferrer">Live demo</a></p>
     </div>
   </section>
 
@@ -103,8 +133,8 @@
   <section class="cs-section" aria-labelledby="credits">
     <h2 id="credits">Credits</h2>
     <div class="cs-credits">
-      <div><small>Team</small>[ Name, role ]<br>[ Name, role ]</div>
-      <div><small>Lab / course</small>[ Lab or class ]</div>
+      <div><small>Team</small>[ Name, role ]<br>[ Name, role ]<br>[ Name, role ]<br>[ Name, role ]</div>
+      <div><small>Lab / course</small>Arizona State University</div>
       <div><small>Thanks</small>[ Advisors, partners ]</div>
     </div>
   </section>

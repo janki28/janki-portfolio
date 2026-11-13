@@ -56,9 +56,17 @@ h1, h2, h3 { font-weight: 400; }
 .wordmark { font-family: var(--serif); font-size: 26px; text-decoration: none; }
 .header-right { display: flex; align-items: center; gap: 36px; }
 .nav-links { display: flex; gap: 36px; font-size: 15px; }
-.nav-links a { text-decoration: none; padding: 10px 0; }
-.nav-links a[aria-current] {
-  text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1.5px;
+.nav-links a { position: relative; text-decoration: none; padding: 10px 0; }
+/* the underline draws in from the left on hover and for the current page, and slides out to the right when it leaves */
+@media (min-width: 701px) {
+  .nav-links a::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 4px; height: 1.5px; border-radius: 2px;
+    background: currentColor; transform: scaleX(0); transform-origin: right center;
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .nav-links a:hover::after, .nav-links a:focus-visible::after, .nav-links a[aria-current]::after {
+    transform: scaleX(1); transform-origin: left center;
+  }
 }
 
 .theme-toggle {
@@ -134,8 +142,38 @@ h1, h2, h3 { font-weight: 400; }
 /* ---------- scroll indicator: rose (light) / owl (dark) ---------- */
 .scroll-track {
   position: fixed; right: 24px; top: 17vh; bottom: 17vh; width: 2px; border-radius: 2px;
-  background: color-mix(in srgb, var(--ink) 16%, transparent); z-index: 40; pointer-events: none;
+  background: color-mix(in srgb, var(--ink) 16%, transparent); z-index: 40; touch-action: none;
 }
+/* a wider, invisible strip so the thin track is easy to click, and the rose/owl easy to grab */
+.scroll-track::before { content: ""; position: absolute; top: -10px; bottom: -10px; left: -14px; right: -14px; }
+.scroll-thumb { cursor: grab; }
+.is-dragging-scroll, .is-dragging-scroll * { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+.scroll-thumb .tilt { transition: scale 0.25s ease; }
+.scroll-thumb:hover .tilt, .is-dragging-scroll .scroll-thumb .tilt { scale: 1.12; }
+
+/* ---------- touch screens: a swipe settles on the next section / Experience role ----------
+   (mouse, trackpad and keyboard use js/pager.js instead) */
+@media (hover: none) and (pointer: coarse) {
+  html.has-snap { scroll-snap-type: y proximity; }
+  html.has-snap main > section { scroll-snap-align: start; }
+  html.is-gliding { scroll-snap-type: none; }
+}
+.xp-snap { position: absolute; left: 0; width: 1px; height: 1px; pointer-events: none; scroll-snap-align: start; scroll-snap-stop: always; }
+
+/* ---------- back to top ---------- */
+.to-top {
+  position: fixed; right: 20px; bottom: 24px; z-index: 45; width: 48px; height: 48px; padding: 0;
+  display: grid; place-items: center; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  box-shadow: 0 8px 22px rgba(27, 26, 23, 0.12);
+  opacity: 0; visibility: hidden; transform: translateY(14px) scale(0.9);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1), visibility 0s linear 0.45s, border-color 0.25s ease;
+}
+.to-top.is-shown { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.to-top:hover { border-color: var(--ink); transform: translateY(-3px); }
+.to-top svg { transition: transform 0.3s ease; }
+.to-top:hover svg { transform: translateY(-2px); }
+[data-theme="dark"] .to-top { box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45); }
 .scroll-thumb { position: absolute; left: 50%; top: 0; width: max-content; will-change: transform; }
 .scroll-thumb .tilt { transform-origin: 50% 20%; }
 .scroll-thumb svg { overflow: visible; max-width: none; }
@@ -155,6 +193,7 @@ h1, h2, h3 { font-weight: 400; }
   }
   .nav-links a { padding: 12px 8px; }
   .scroll-track { right: 10px; top: 14vh; bottom: 14vh; }
+  .to-top { right: 14px; bottom: calc(90px + env(safe-area-inset-bottom)); width: 44px; height: 44px; }
   .scroll-thumb svg { transform: scale(0.75); transform-origin: top center; }
   .site-footer { padding-bottom: 28px; }
 }

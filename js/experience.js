@@ -13,7 +13,7 @@
 
   function timeline(svg) {
     const route = svg.querySelector(".xp-route-fg");
-    const reveal = svg.querySelector(".xp-reveal");
+    const routeBg = svg.querySelector(".xp-route-bg");
     const traveler = svg.querySelector(".xp-traveler");
     const nodes = [...svg.querySelectorAll(".xp-node")];
     const W = +svg.dataset.w;
@@ -39,10 +39,30 @@
     lens.push(total);
     const lastNode = nodes.length;
 
+    // the gold route is drawn by giving it the same dash pattern as the grey one, but only up to the traveler
+    // (much cheaper to repaint every frame than masking the whole drawing)
+    let dash = [14, 13], drawn = -1;
+    function readDash() {
+      const v = getComputedStyle(routeBg).strokeDasharray.split(/[\s,]+/).map(parseFloat).filter((n) => n > 0);
+      if (v.length >= 2) dash = [v[0], v[1]];
+      drawn = -1;
+    }
+    function drawRoute(len) {
+      const L = Math.round(len);
+      if (L === drawn) return;
+      drawn = L;
+      const cyc = dash[0] + dash[1], n = Math.floor(L / cyc), r = L - n * cyc;
+      let s = "";
+      for (let i = 0; i < n; i++) s += dash[0] + " " + dash[1] + " ";
+      route.style.strokeDasharray = s + Math.min(r, dash[0]).toFixed(1) + " " + Math.ceil(total + cyc);
+    }
+    readDash();
+
     let ys = [], k = 1;
     let disp = 0, tgt = 0, face = 1, dir = 1, angle = 0, raf = 0, last = 0;
 
     function measure() {
+      readDash();
       const r = svg.getBoundingClientRect();
       k = r.width / W || 1;
       const top = r.top + window.scrollY;
@@ -89,11 +109,10 @@
       }
       traveler.setAttribute("transform", `translate(${q.x.toFixed(1)} ${q.y.toFixed(1)}) scale(${(face * s).toFixed(3)} ${s.toFixed(3)}) rotate(${angle.toFixed(1)})`);
       traveler.style.opacity = o.toFixed(3);
-      reveal.style.strokeDasharray = `${total} ${total}`;
-      reveal.style.strokeDashoffset = String(total - disp);
+      drawRoute(disp);
 
       let current = -1;
-      for (let i = 0; i < nodes.length; i++) if (disp >= lens[i + 1] - 1) current = i;
+      for (let i = 0; i < nodes.length; i++) if (disp >= lens[i + 1] - 10) current = i;
       setStates(current);
     }
 
@@ -101,9 +120,9 @@
       const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
       last = now;
       const diff = tgt - disp;
-      if (Math.abs(diff) > 0.4) {
+      if (Math.abs(diff) > 1.5) {
         dir = diff >= 0 ? 1 : -1;
-        disp += diff * (1 - Math.exp(-dt * 5));      // glide: a fast scroll never makes the traveler teleport
+        disp += diff * (1 - Math.exp(-dt * 8.5));    // glide: a fast scroll never makes the traveler teleport
         place();
         raf = requestAnimationFrame(tick);
       } else {
@@ -133,6 +152,12 @@
         } else { disp = tgt = target(); place(); }
       },
       relayout() { measure(); if (reduce.matches) this.activate(); else this.go(); },
+      // page scroll positions where the traveler sits exactly on each role, plus where it has flown off
+      stops() {
+        measure();
+        const at = window.innerHeight * 0.55;
+        return { roles: ys.slice(1, -1).map((y) => y - at), end: ys[ys.length - 1] - at };
+      },
     };
   }
 
@@ -140,7 +165,7 @@
   function lazy(svg) {
     let tl = null;
     const get = () => tl || (tl = timeline(svg));
-    return { go: () => get().go(), activate: () => get().activate(), relayout: () => get().relayout() };
+    return { go: () => get().go(), activate: () => get().activate(), relayout: () => get().relayout(), stops: () => get().stops() };
   }
   const wide = lazy(xp.querySelector(".xp-svg--d"));
   const narrow = lazy(xp.querySelector(".xp-svg--m"));
@@ -149,10 +174,30 @@
   // if anything goes wrong, show the finished timeline instead of an empty section
   function safe(fn) { return () => { try { fn(); } catch (e) { xp.classList.add("xp-static"); } }; }
 
+  // js/pager.js steps the page one role at a time using these positions
+  xp.xpStops = () => { try { return active().stops(); } catch (e) { return null; } };
+
+  // touch screens: invisible snap points, so a swipe settles on each role instead of flying past it
+  const touch = window.matchMedia("(hover: none) and (pointer: coarse)");
+  let snaps = [];
+  function placeSnaps() {
+    if (!touch.matches || reduce.matches) { snaps.forEach((s) => s.remove()); snaps = []; document.documentElement.classList.remove("has-snap"); return; }
+    const s = xp.xpStops();
+    if (!s) return;
+    const host = xp.parentElement;    // outside .xp, which clips on phones (a clipping box would capture the snap points)
+    const top = host.getBoundingClientRect().top + window.scrollY;
+    const ys = [...s.roles, s.end].map((y) => y - top).filter((y) => y > 40);
+    while (snaps.length < ys.length) { const d = document.createElement("div"); d.className = "xp-snap"; d.setAttribute("aria-hidden", "true"); host.appendChild(d); snaps.push(d); }
+    while (snaps.length > ys.length) snaps.pop().remove();
+    ys.forEach((y, i) => { snaps[i].style.top = y.toFixed(0) + "px"; });
+    document.documentElement.classList.add("has-snap");
+  }
+
   try { active().activate(); xp.classList.add("is-live"); } catch (e) { xp.classList.add("xp-static"); }
   window.addEventListener("scroll", safe(() => { if (!reduce.matches) active().go(); }), { passive: true });
-  window.addEventListener("resize", safe(() => active().relayout()));
-  window.addEventListener("load", safe(() => active().relayout()));
+  window.addEventListener("resize", safe(() => { active().relayout(); placeSnaps(); }));
+  window.addEventListener("load", safe(() => { active().relayout(); placeSnaps(); }));
+  safe(placeSnaps)();
   if (phone.addEventListener) phone.addEventListener("change", safe(() => active().activate()));
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(safe(() => active().relayout()));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(safe(() => { active().relayout(); placeSnaps(); }));
 })();

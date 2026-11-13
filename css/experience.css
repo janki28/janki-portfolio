@@ -8,7 +8,7 @@
    - tablet + desktop (701px and up): a 1440 x 2640 canvas that scales with the page width
    - phone (700px and under): a 390 x 2060 canvas, path down the left edge, cards on the right
    ========================================================================== */
-.xp-section { padding: 90px 0 calc(55vh + 100px); } /* blank space after the bee leaves, before the polaroids */
+.xp-section { position: relative; padding: 90px 0 calc(55vh + 100px); } /* blank space after the bee leaves, before the polaroids */
 .xp-title { padding: 0 var(--gutter); font-size: clamp(52px, 7vw, 80px); }
 
 .xp {
@@ -53,8 +53,13 @@
    so if the script is blocked or fails, the whole timeline still shows */
 .xp-node { transition: opacity 0.5s ease; }
 .xp-node .pop { transform-box: fill-box; transform-origin: center; transition: transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1); }
-.xp.is-live .xp-node { opacity: 0; }
-.xp.is-live .xp-node .pop { transform: scale(0.7); }
+/* roles not reached yet wait as faint dashed placeholders with their year, so visitors can see what is ahead */
+.xp.is-live .xp-node:not(.is-lit) .pop { transform: scale(0.86); }
+.xp.is-live .xp-node:not(.is-lit) .hx { fill: transparent; stroke: var(--xp-future); stroke-width: 2.5; stroke-dasharray: 7 6; }
+.xp.is-live .xp-node:not(.is-lit) text { fill: var(--muted); opacity: 0.75; }
+.xp.is-live .xp-node:not(.is-lit) .dec, .xp.is-live .xp-node:not(.is-lit) .halo { opacity: 0; }
+.xp-node text { transition: fill 0.45s ease, opacity 0.45s ease; }
+.xp-node .dec { transition: opacity 0.5s ease; }
 .xp-node .hx { fill: var(--xp-cell); stroke: var(--xp-cell-line); stroke-width: 2; transition: fill 0.45s ease, stroke 0.45s ease; }
 .xp-node text { font-family: var(--sans); font-weight: 500; text-anchor: middle; fill: var(--xp-text); }
 .xp-node .dec { fill: var(--xp-cell); opacity: 0.4; }
